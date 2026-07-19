@@ -1,6 +1,6 @@
 # PL/SQL Oracle Live SQL
 
-A collection of hands-on PL/SQL exercises for [Oracle Live SQL](https://livesql.oracle.com/). Contains **70 self-contained scripts** organized into 7 topics with 10 questions each.
+A collection of hands-on PL/SQL exercises for [Oracle Live SQL](https://livesql.oracle.com/). Self-contained scripts organized by topic, ready to run in your session.
 
 ## Project structure
 
