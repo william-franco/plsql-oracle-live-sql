@@ -1,0 +1,46 @@
+-- Questao 03: Funcao que retorna booleano
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP FUNCTION fn_recebe_comissao_q03';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE FUNCIONARIOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+
+CREATE OR REPLACE FUNCTION fn_recebe_comissao_q03 (
+  p_employee_id IN FUNCIONARIOS.EMPLOYEE_ID%TYPE
+) RETURN BOOLEAN IS
+  v_commission_pct FUNCIONARIOS.COMMISSION_PCT%TYPE;
+BEGIN
+  SELECT COMMISSION_PCT
+    INTO v_commission_pct
+    FROM FUNCIONARIOS
+   WHERE EMPLOYEE_ID = p_employee_id;
+
+  RETURN v_commission_pct IS NOT NULL;
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+  v_resultado BOOLEAN;
+BEGIN
+  v_resultado := fn_recebe_comissao_q03(100);
+
+  IF v_resultado THEN
+    DBMS_OUTPUT.PUT_LINE('Funcionario recebe comissao.');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Funcionario nao recebe comissao.');
+  END IF;
+END;
+/

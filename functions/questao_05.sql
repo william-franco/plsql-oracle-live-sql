@@ -1,0 +1,42 @@
+-- Questao 05: Funcao com cursor interno
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP FUNCTION fn_total_pedidos_q05';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE PEDIDOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
+
+CREATE OR REPLACE FUNCTION fn_total_pedidos_q05 (
+  p_sales_rep_id IN PEDIDOS.SALES_REP_ID%TYPE
+) RETURN NUMBER IS
+  v_total NUMBER := 0;
+
+  CURSOR c_pedidos IS
+    SELECT ORDER_TOTAL
+      FROM PEDIDOS
+     WHERE SALES_REP_ID = p_sales_rep_id;
+BEGIN
+  FOR r_pedido IN c_pedidos LOOP
+    v_total := v_total + NVL(r_pedido.ORDER_TOTAL, 0);
+  END LOOP;
+
+  RETURN v_total;
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Total de pedidos: ' || fn_total_pedidos_q05(153));
+END;
+/

@@ -1,0 +1,40 @@
+-- Questao 10: Procedimento com parametro padrao
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PROCEDURE prc_atualizar_pedido_q10';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE PEDIDOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
+
+CREATE OR REPLACE PROCEDURE prc_atualizar_pedido_q10 (
+  p_order_id     IN PEDIDOS.ORDER_ID%TYPE,
+  p_order_status IN PEDIDOS.ORDER_STATUS%TYPE DEFAULT 'PENDING'
+) IS
+BEGIN
+  UPDATE PEDIDOS
+     SET ORDER_STATUS = p_order_status
+   WHERE ORDER_ID = p_order_id;
+
+  DBMS_OUTPUT.PUT_LINE(
+    SQL%ROWCOUNT || ' registro(s) atualizado(s) para status ' || p_order_status
+  );
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  prc_atualizar_pedido_q10(2459);
+  ROLLBACK;
+END;
+/

@@ -1,0 +1,77 @@
+-- Questao 08: Procedimento que chama outro procedimento
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PROCEDURE prc_inserir_pedido_rep_q08';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PROCEDURE prc_validar_funcionario_q08';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE FUNCIONARIOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE PEDIDOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
+
+CREATE OR REPLACE PROCEDURE prc_validar_funcionario_q08 (
+  p_employee_id IN FUNCIONARIOS.EMPLOYEE_ID%TYPE
+) IS
+  v_count NUMBER;
+BEGIN
+  SELECT COUNT(*)
+    INTO v_count
+    FROM FUNCIONARIOS
+   WHERE EMPLOYEE_ID = p_employee_id;
+
+  IF v_count = 0 THEN
+    RAISE_APPLICATION_ERROR(-20008, 'Funcionario inexistente: ' || p_employee_id);
+  END IF;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE prc_inserir_pedido_rep_q08 (
+  p_order_id     IN PEDIDOS.ORDER_ID%TYPE,
+  p_customer_id  IN PEDIDOS.CUSTOMER_ID%TYPE,
+  p_order_total  IN PEDIDOS.ORDER_TOTAL%TYPE,
+  p_sales_rep_id IN PEDIDOS.SALES_REP_ID%TYPE
+) IS
+BEGIN
+  prc_validar_funcionario_q08(p_sales_rep_id);
+
+  INSERT INTO PEDIDOS (
+    ORDER_ID, ORDER_DATE, ORDER_MODE, CUSTOMER_ID,
+    ORDER_STATUS, ORDER_TOTAL, SALES_REP_ID
+  ) VALUES (
+    p_order_id, SYSDATE, 'direct', p_customer_id,
+    'PENDING', p_order_total, p_sales_rep_id
+  );
+
+  DBMS_OUTPUT.PUT_LINE('Pedido inserido para representante ' || p_sales_rep_id);
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  prc_inserir_pedido_rep_q08(99995, 101, 2000, 153);
+  ROLLBACK;
+END;
+/

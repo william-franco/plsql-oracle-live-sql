@@ -1,0 +1,51 @@
+-- Questao 08: Parametro do tipo colecao
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PROCEDURE sp_aplicar_bonus_q08';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TYPE lista_ids_q08';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE FUNCIONARIOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+
+CREATE OR REPLACE TYPE lista_ids_q08 AS TABLE OF NUMBER;
+/
+
+CREATE OR REPLACE PROCEDURE sp_aplicar_bonus_q08 (
+  p_employee_ids IN lista_ids_q08,
+  p_bonus        IN NUMBER DEFAULT 500
+) IS
+BEGIN
+  FORALL i IN 1 .. p_employee_ids.COUNT
+    UPDATE FUNCIONARIOS
+       SET SALARY = SALARY + p_bonus
+     WHERE EMPLOYEE_ID = p_employee_ids(i);
+
+  DBMS_OUTPUT.PUT_LINE('Bonus aplicado a ' || SQL%ROWCOUNT || ' funcionarios.');
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+  v_ids lista_ids_q08 := lista_ids_q08(100, 101, 102);
+BEGIN
+  sp_aplicar_bonus_q08(v_ids, 300);
+  ROLLBACK;
+END;
+/

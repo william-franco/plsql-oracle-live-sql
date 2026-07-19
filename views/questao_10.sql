@@ -1,0 +1,29 @@
+-- Questao 10: View com colunas calculadas
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP VIEW vw_pedidos_desconto_q10';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE PEDIDOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
+
+CREATE OR REPLACE VIEW vw_pedidos_desconto_q10 AS
+SELECT ORDER_ID,
+       ORDER_DATE,
+       ORDER_STATUS,
+       ORDER_TOTAL,
+       ORDER_TOTAL * (1 - 10 / 100) AS valor_com_desconto
+  FROM PEDIDOS;
+
+SELECT ORDER_ID, ORDER_TOTAL, valor_com_desconto
+  FROM vw_pedidos_desconto_q10
+ WHERE ROWNUM <= 5;

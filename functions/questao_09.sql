@@ -1,0 +1,41 @@
+-- Questao 09: Funcao recursiva
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP FUNCTION fn_contar_subordinados_q09';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE FUNCIONARIOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+
+CREATE OR REPLACE FUNCTION fn_contar_subordinados_q09 (
+  p_employee_id IN FUNCIONARIOS.EMPLOYEE_ID%TYPE
+) RETURN NUMBER IS
+  v_total NUMBER := 0;
+BEGIN
+  FOR r_sub IN (
+    SELECT EMPLOYEE_ID
+      FROM FUNCIONARIOS
+     WHERE MANAGER_ID = p_employee_id
+  ) LOOP
+    v_total := v_total + 1 + fn_contar_subordinados_q09(r_sub.EMPLOYEE_ID);
+  END LOOP;
+
+  RETURN v_total;
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Subordinados de 100: ' || fn_contar_subordinados_q09(100));
+END;
+/

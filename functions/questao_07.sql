@@ -1,0 +1,40 @@
+-- Questao 07: Funcao com parametro padrao
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP FUNCTION fn_calcular_bonus_q07';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE FUNCIONARIOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+
+CREATE OR REPLACE FUNCTION fn_calcular_bonus_q07 (
+  p_employee_id       IN FUNCIONARIOS.EMPLOYEE_ID%TYPE,
+  p_percentual_bonus  IN NUMBER DEFAULT 10
+) RETURN NUMBER IS
+  v_salary FUNCIONARIOS.SALARY%TYPE;
+BEGIN
+  SELECT SALARY
+    INTO v_salary
+    FROM FUNCIONARIOS
+   WHERE EMPLOYEE_ID = p_employee_id;
+
+  RETURN v_salary * (p_percentual_bonus / 100);
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Bonus padrao (10%): ' || fn_calcular_bonus_q07(100));
+  DBMS_OUTPUT.PUT_LINE('Bonus customizado (15%): ' || fn_calcular_bonus_q07(100, 15));
+END;
+/

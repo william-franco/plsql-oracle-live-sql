@@ -1,0 +1,35 @@
+-- Questao 01: Procedimento sem parametros
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PROCEDURE prc_total_funcionarios_q01';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE FUNCIONARIOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+
+CREATE OR REPLACE PROCEDURE prc_total_funcionarios_q01 IS
+  v_total NUMBER;
+BEGIN
+  SELECT COUNT(*)
+    INTO v_total
+    FROM FUNCIONARIOS;
+
+  DBMS_OUTPUT.PUT_LINE('Total de funcionarios: ' || v_total);
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  prc_total_funcionarios_q01;
+END;
+/
