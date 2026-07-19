@@ -1,7 +1,66 @@
 # PL/SQL Oracle Live SQL
 
-Under construction.
+A collection of hands-on PL/SQL exercises for [Oracle Live SQL](https://livesql.oracle.com/). Contains **70 self-contained scripts** organized into 7 topics with 10 questions each.
 
+## Project structure
+
+```
+plsql-oracle-live-sql/
+├── exceptions/          (10 exercises)
+├── functions/           (10 exercises)
+├── packages/            (10 exercises)
+├── procedures/          (10 exercises)
+├── stored-procedures/   (10 exercises)
+├── triggers/            (10 exercises)
+├── views/               (10 exercises)
+├── lista-exercicios-plsql.md
+├── LICENSE
+└── README.md
+```
+
+## Topics covered
+
+| Folder | Main concepts |
+|---|---|
+| `exceptions/` | NO_DATA_FOUND, TOO_MANY_ROWS, RAISE_APPLICATION_ERROR, PRAGMA EXCEPTION_INIT, SQLCODE/SQLERRM |
+| `functions/` | Scalar, boolean, and recursive functions, DETERMINISTIC, collections, DEFAULT parameters |
+| `packages/` | Specification/body, global variables, overloading, RECORD/TABLE types, CRUD |
+| `procedures/` | IN/OUT/IN OUT parameters, INSERT/UPDATE, explicit cursors, procedure calls |
+| `stored-procedures/` | Transaction control, AUTONOMOUS_TRANSACTION, EXECUTE IMMEDIATE, REF CURSOR, BULK COLLECT/FORALL, SAVEPOINT |
+| `triggers/` | BEFORE/AFTER, INSTEAD OF, compound triggers, sequences, business hours restriction |
+| `views/` | Simple views, JOIN, aggregation, WITH CHECK OPTION, materialized view, UNION |
+
+## Prerequisites
+
+- Access to [Oracle Live SQL](https://livesql.oracle.com/)
+- Sample schemas **HR** and **OE** available in the environment (used by scripts to create local tables)
+
+## How to use
+
+1. Open [Oracle Live SQL](https://livesql.oracle.com/)
+2. Copy the full contents of a file (e.g. `exceptions/questao_01.sql`)
+3. Run the script in your session
+4. Each file creates its own tables and runs a demonstration at the end
+
+All exercises use local tables derived from the sample schemas:
+
+```sql
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
+```
+
+- **FUNCIONARIOS** — based on `HR.EMPLOYEES`
+- **PEDIDOS** — based on `OE.ORDERS`
+
+## Exercise rules
+
+- Each question lives in a single `.sql` file with no dependencies on other files
+- Auxiliary objects (log tables, sequences, types) are created within the same script
+- Scripts include demonstration blocks when applicable (`DBMS_OUTPUT`, `SELECT`, etc.)
+
+## Exercise descriptions
+
+Detailed descriptions for each question are in [lista-exercicios-plsql.md](lista-exercicios-plsql.md).
 
 ## Examples of commits
 
@@ -22,7 +81,6 @@ git add . && git commit -m ":test_tube: Added test functionality xyz." && git pu
 git add . && git commit -m ":construction_worker: Building in progress." && git push
 git add . && git commit -m ":construction_worker: Added CI build system." && git push
 ```
-
 
 ## License
 
