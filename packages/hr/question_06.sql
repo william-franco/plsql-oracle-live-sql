@@ -1,0 +1,55 @@
+-- Question 06: Package initialization section
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE FUNCIONARIOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PACKAGE pkg_estado_func';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE OR REPLACE PACKAGE pkg_estado_func IS
+  g_total_funcionarios NUMBER;
+  FUNCTION fn_total RETURN NUMBER;
+END pkg_estado_func;
+/
+CREATE OR REPLACE PACKAGE BODY pkg_estado_func IS
+  FUNCTION fn_total RETURN NUMBER IS
+  BEGIN
+    RETURN g_total_funcionarios;
+  END;
+BEGIN
+  SELECT COUNT(*) INTO g_total_funcionarios FROM FUNCIONARIOS;
+  DBMS_OUTPUT.PUT_LINE('Pacote inicializado com ' || g_total_funcionarios || ' funcionarios');
+END pkg_estado_func;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE RESULTADO_DEMO PURGE';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+CREATE TABLE RESULTADO_DEMO (RESULTADO VARCHAR2(4000));
+
+DECLARE
+  v_resultado VARCHAR2(4000);
+BEGIN
+  v_resultado := 'Total carregado na init: ' || pkg_estado_func.fn_total;
+  DELETE FROM RESULTADO_DEMO;
+  INSERT INTO RESULTADO_DEMO VALUES (v_resultado);
+  DBMS_OUTPUT.PUT_LINE(v_resultado);
+END;
+/
+
+SELECT RESULTADO FROM RESULTADO_DEMO;

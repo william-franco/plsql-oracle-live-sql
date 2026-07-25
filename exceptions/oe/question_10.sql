@@ -1,0 +1,57 @@
+-- Question 10: Business rule exception - future ORDER_DATE
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE PEDIDOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
+
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE PROCEDURE prc_inserir_pedido_data (
+  p_order_id     IN PEDIDOS.ORDER_ID%TYPE,
+  p_order_date   IN PEDIDOS.ORDER_DATE%TYPE,
+  p_order_mode   IN PEDIDOS.ORDER_MODE%TYPE,
+  p_customer_id  IN PEDIDOS.CUSTOMER_ID%TYPE,
+  p_order_status IN PEDIDOS.ORDER_STATUS%TYPE,
+  p_order_total  IN PEDIDOS.ORDER_TOTAL%TYPE,
+  p_sales_rep_id IN PEDIDOS.SALES_REP_ID%TYPE
+) IS
+  data_futura_exc EXCEPTION;
+BEGIN
+  IF p_order_date > TRUNC(SYSDATE) THEN
+    RAISE data_futura_exc;
+  END IF;
+  INSERT INTO PEDIDOS (
+    ORDER_ID, ORDER_DATE, ORDER_MODE, CUSTOMER_ID, ORDER_STATUS, ORDER_TOTAL, SALES_REP_ID
+  ) VALUES (
+    p_order_id, p_order_date, p_order_mode, p_customer_id, p_order_status, p_order_total, p_sales_rep_id
+  );
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE RESULTADO_DEMO PURGE';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+CREATE TABLE RESULTADO_DEMO (RESULTADO VARCHAR2(4000));
+
+DECLARE
+  v_resultado VARCHAR2(4000);
+BEGIN
+  prc_inserir_pedido_data(99003, SYSDATE + 10, 'direct', 101, 'PENDING', 500, 153);
+EXCEPTION
+  WHEN OTHERS THEN
+    v_resultado := 'Data futura nao permitida: ' || SQLERRM;
+    DELETE FROM RESULTADO_DEMO;
+    INSERT INTO RESULTADO_DEMO VALUES (v_resultado);
+    DBMS_OUTPUT.PUT_LINE(v_resultado);
+END;
+/
+
+SELECT RESULTADO FROM RESULTADO_DEMO;

@@ -1,0 +1,59 @@
+-- Question 05: Package cursor - list customer orders
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE PEDIDOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PACKAGE pkg_cliente_ped';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE OR REPLACE PACKAGE pkg_cliente_ped IS
+  PROCEDURE prc_listar (p_customer_id IN NUMBER);
+END pkg_cliente_ped;
+/
+CREATE OR REPLACE PACKAGE BODY pkg_cliente_ped IS
+  CURSOR c_ped (p_customer_id NUMBER) IS
+    SELECT ORDER_ID, ORDER_STATUS, ORDER_TOTAL FROM PEDIDOS
+     WHERE CUSTOMER_ID = p_customer_id ORDER BY ORDER_ID;
+  PROCEDURE prc_listar (p_customer_id IN NUMBER) IS
+    v_reg c_ped%ROWTYPE;
+  BEGIN
+    FOR v_reg IN c_ped(p_customer_id) LOOP
+      DBMS_OUTPUT.PUT_LINE(v_reg.ORDER_ID || ' - status ' || v_reg.ORDER_STATUS || ' - ' || v_reg.ORDER_TOTAL);
+    END LOOP;
+  END;
+END pkg_cliente_ped;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE RESULTADO_DEMO PURGE';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+CREATE TABLE RESULTADO_DEMO (RESULTADO VARCHAR2(4000));
+
+DECLARE
+  v_resultado VARCHAR2(4000);
+BEGIN
+  pkg_cliente_ped.prc_listar(101);
+  SELECT COUNT(*) INTO v_resultado FROM PEDIDOS WHERE CUSTOMER_ID = 101;
+  v_resultado := 'Pedidos cliente 101 listados: ' || v_resultado;
+  DELETE FROM RESULTADO_DEMO;
+  INSERT INTO RESULTADO_DEMO VALUES (v_resultado);
+  DBMS_OUTPUT.PUT_LINE(v_resultado);
+END;
+/
+
+SELECT RESULTADO FROM RESULTADO_DEMO;

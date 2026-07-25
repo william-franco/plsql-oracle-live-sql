@@ -1,0 +1,68 @@
+-- Question 08: Procedure calling another procedure
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE PEDIDOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PROCEDURE prc_validar_cliente';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PROCEDURE prc_inserir_pedido_validado';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE prc_validar_cliente (p_customer_id IN NUMBER) IS
+  v_qtd NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_qtd FROM PEDIDOS WHERE CUSTOMER_ID = p_customer_id;
+  IF v_qtd = 0 THEN
+    RAISE_APPLICATION_ERROR(-20011, 'Cliente sem pedidos cadastrados');
+  END IF;
+END;
+/
+CREATE OR REPLACE PROCEDURE prc_inserir_pedido_validado (
+  p_order_id    IN NUMBER,
+  p_customer_id IN NUMBER,
+  p_order_total IN NUMBER
+) IS
+BEGIN
+  prc_validar_cliente(p_customer_id);
+  INSERT INTO PEDIDOS (ORDER_ID, ORDER_DATE, ORDER_MODE, CUSTOMER_ID, ORDER_STATUS, ORDER_TOTAL)
+  VALUES (p_order_id, SYSDATE, 'direct', p_customer_id, 0, p_order_total);
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE RESULTADO_DEMO PURGE';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+CREATE TABLE RESULTADO_DEMO (RESULTADO VARCHAR2(4000));
+
+DECLARE
+  v_resultado VARCHAR2(4000);
+BEGIN
+  prc_inserir_pedido_validado(99002, 101, 750);
+  v_resultado := 'Pedido inserido apos validacao do cliente 101';
+  DELETE FROM PEDIDOS WHERE ORDER_ID = 99002;
+  DELETE FROM RESULTADO_DEMO;
+  INSERT INTO RESULTADO_DEMO VALUES (v_resultado);
+  DBMS_OUTPUT.PUT_LINE(v_resultado);
+END;
+/
+
+SELECT RESULTADO FROM RESULTADO_DEMO;
