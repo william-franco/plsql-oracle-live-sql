@@ -1,0 +1,55 @@
+-- Questao 06: Secao de inicializacao do pacote
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE PEDIDOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PACKAGE pkg_estado_ped';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE OR REPLACE PACKAGE pkg_estado_ped IS
+  g_total_pedidos NUMBER;
+  FUNCTION fn_total RETURN NUMBER;
+END pkg_estado_ped;
+/
+CREATE OR REPLACE PACKAGE BODY pkg_estado_ped IS
+  FUNCTION fn_total RETURN NUMBER IS
+  BEGIN
+    RETURN g_total_pedidos;
+  END;
+BEGIN
+  SELECT COUNT(*) INTO g_total_pedidos FROM PEDIDOS;
+  DBMS_OUTPUT.PUT_LINE('Pacote inicializado com ' || g_total_pedidos || ' pedidos');
+END pkg_estado_ped;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE RESULTADO_DEMO PURGE';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+CREATE TABLE RESULTADO_DEMO (RESULTADO VARCHAR2(4000));
+
+DECLARE
+  v_resultado VARCHAR2(4000);
+BEGIN
+  v_resultado := 'Total carregado na init: ' || pkg_estado_ped.fn_total;
+  DELETE FROM RESULTADO_DEMO;
+  INSERT INTO RESULTADO_DEMO VALUES (v_resultado);
+  DBMS_OUTPUT.PUT_LINE(v_resultado);
+END;
+/
+
+SELECT RESULTADO FROM RESULTADO_DEMO;

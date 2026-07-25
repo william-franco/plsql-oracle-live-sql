@@ -1,0 +1,58 @@
+-- Questao 06: Procedimento UPDATE condicional - com comissao
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE FUNCIONARIOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PROCEDURE prc_aumentar_com_comissao';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE prc_aumentar_com_comissao (
+  p_employee_id IN FUNCIONARIOS.EMPLOYEE_ID%TYPE,
+  p_percentual  IN NUMBER
+) IS
+  v_pct FUNCIONARIOS.COMMISSION_PCT%TYPE;
+BEGIN
+  SELECT COMMISSION_PCT INTO v_pct FROM FUNCIONARIOS WHERE EMPLOYEE_ID = p_employee_id;
+  IF v_pct IS NOT NULL THEN
+    UPDATE FUNCIONARIOS
+       SET SALARY = ROUND(SALARY * (1 + p_percentual / 100), 2)
+     WHERE EMPLOYEE_ID = p_employee_id;
+    DBMS_OUTPUT.PUT_LINE('Aumento aplicado ao funcionario ' || p_employee_id);
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Funcionario sem comissao - aumento nao aplicado');
+  END IF;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE RESULTADO_DEMO PURGE';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+CREATE TABLE RESULTADO_DEMO (RESULTADO VARCHAR2(4000));
+
+DECLARE
+  v_resultado VARCHAR2(4000);
+BEGIN
+  prc_aumentar_com_comissao(145, 5);
+  v_resultado := 'Procedimento executado para funcionario com comissao (145)';
+  DELETE FROM RESULTADO_DEMO;
+  INSERT INTO RESULTADO_DEMO VALUES (v_resultado);
+  DBMS_OUTPUT.PUT_LINE(v_resultado);
+END;
+/
+
+SELECT RESULTADO FROM RESULTADO_DEMO;

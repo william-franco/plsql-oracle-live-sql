@@ -1,0 +1,61 @@
+-- Questao 04: Sobrecarga calcular_bonus
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE FUNCIONARIOS CASCADE CONSTRAINTS';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP PACKAGE pkg_bonus';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+
+CREATE OR REPLACE PACKAGE pkg_bonus IS
+  FUNCTION calcular_bonus (p_employee_id IN NUMBER, p_percentual IN NUMBER DEFAULT 10) RETURN NUMBER;
+  FUNCTION calcular_bonus (p_employee_id IN NUMBER, p_valor_fixo IN NUMBER, p_fixo IN BOOLEAN) RETURN NUMBER;
+END pkg_bonus;
+/
+CREATE OR REPLACE PACKAGE BODY pkg_bonus IS
+  FUNCTION calcular_bonus (p_employee_id IN NUMBER, p_percentual IN NUMBER DEFAULT 10) RETURN NUMBER IS
+    v_salary NUMBER;
+  BEGIN
+    SELECT SALARY INTO v_salary FROM FUNCIONARIOS WHERE EMPLOYEE_ID = p_employee_id;
+    RETURN ROUND(v_salary * p_percentual / 100, 2);
+  END;
+  FUNCTION calcular_bonus (p_employee_id IN NUMBER, p_valor_fixo IN NUMBER, p_fixo IN BOOLEAN) RETURN NUMBER IS
+    v_salary NUMBER;
+  BEGIN
+    SELECT SALARY INTO v_salary FROM FUNCIONARIOS WHERE EMPLOYEE_ID = p_employee_id;
+    RETURN v_salary + p_valor_fixo;
+  END;
+END pkg_bonus;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE RESULTADO_DEMO PURGE';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+CREATE TABLE RESULTADO_DEMO (RESULTADO VARCHAR2(4000));
+
+DECLARE
+  v_resultado VARCHAR2(4000);
+BEGIN
+  v_resultado := 'Bonus percentual: ' || pkg_bonus.calcular_bonus(100)
+    || ' | bonus fixo: ' || pkg_bonus.calcular_bonus(100, 500, TRUE);
+  DELETE FROM RESULTADO_DEMO;
+  INSERT INTO RESULTADO_DEMO VALUES (v_resultado);
+  DBMS_OUTPUT.PUT_LINE(v_resultado);
+END;
+/
+
+SELECT RESULTADO FROM RESULTADO_DEMO;
