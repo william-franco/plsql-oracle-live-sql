@@ -1,22 +1,29 @@
 # PL/SQL Oracle Live SQL
 
-A collection of hands-on PL/SQL exercises for [Oracle Live SQL](https://livesql.oracle.com/). Self-contained scripts organized by topic, ready to run in your session.
+A collection of hands-on PL/SQL exercises for [Oracle Live SQL](https://livesql.oracle.com/). Self-contained scripts organized by topic and data domain, ready to run in your session.
 
 ## Project structure
 
 ```
 plsql-oracle-live-sql/
-├── exceptions/          (10 exercises)
-├── functions/           (10 exercises)
-├── packages/            (10 exercises)
-├── procedures/          (10 exercises)
-├── stored-procedures/   (10 exercises)
-├── triggers/            (10 exercises)
-├── views/               (10 exercises)
+├── exceptions/          (20 exercises: hr/ + oe/)
+├── functions/           (20 exercises: hr/ + oe/)
+├── packages/            (20 exercises: hr/ + oe/)
+├── procedures/          (20 exercises: hr/ + oe/)
+├── stored-procedures/   (20 exercises: hr/ + oe/)
+├── triggers/            (20 exercises: hr/ + oe/)
+├── views/               (20 exercises: hr/ + oe/)
 ├── lista-exercicios-plsql.md
 ├── LICENSE
 └── README.md
 ```
+
+Each topic folder contains two subfolders:
+
+- **`hr/`** — 10 exercises using **FUNCIONARIOS** (from `HR.EMPLOYEES`)
+- **`oe/`** — 10 exercises using **PEDIDOS** (from `OE.ORDERS`)
+
+**Total: 140 exercises** (7 topics × 2 domains × 10 questions).
 
 ## Topics covered
 
@@ -33,30 +40,81 @@ plsql-oracle-live-sql/
 ## Prerequisites
 
 - Access to [Oracle Live SQL](https://livesql.oracle.com/)
-- Sample schemas **HR** and **OE** available in the environment (used by scripts to create local tables)
+- Sample schemas **HR** and **OE** available in the environment
 
 ## How to use
 
 1. Open [Oracle Live SQL](https://livesql.oracle.com/)
-2. Copy the full contents of a file (e.g. `exceptions/questao_01.sql`)
-3. Run the script in your session
-4. Each file creates its own tables and runs a demonstration at the end
+2. Copy the full contents of a file (e.g. `exceptions/hr/questao_01.sql`)
+3. Run the script with **Run Script** (executes the entire file)
+4. Check the result grid (`RESULTADO` column) or the **DBMS Output** panel
 
-All exercises use local tables derived from the sample schemas:
+Each file is **self-contained**: it creates only the base table required for its domain, implements the solution, and includes a demonstration block when applicable.
+
+### Base tables by subfolder
+
+**HR exercises** create only:
 
 ```sql
 CREATE TABLE FUNCIONARIOS AS SELECT * FROM HR.EMPLOYEES;
+```
+
+**OE exercises** create only:
+
+```sql
 CREATE TABLE PEDIDOS AS SELECT * FROM OE.ORDERS;
 ```
 
-- **FUNCIONARIOS** — based on `HR.EMPLOYEES`
-- **PEDIDOS** — based on `OE.ORDERS`
+## Oracle Live SQL output
+
+### Run Script vs Run Statement
+
+- **Run Script**: runs the full file. Use this mode.
+- **Run Statement**: runs only the selected block and may skip the demo.
+
+### Visible output with `RESULTADO_DEMO`
+
+Oracle Live SQL does not support SQL\*Plus commands such as `VAR` and `PRINT`. Scripts with a demonstration store the main message in a local table and query it at the end:
+
+```sql
+BEGIN
+  EXECUTE IMMEDIATE 'DROP TABLE RESULTADO_DEMO PURGE';
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END;
+/
+CREATE TABLE RESULTADO_DEMO (RESULTADO VARCHAR2(4000));
+
+DECLARE
+  v_resultado VARCHAR2(4000);
+BEGIN
+  v_resultado := 'Message shown in the result grid.';
+  DELETE FROM RESULTADO_DEMO;
+  INSERT INTO RESULTADO_DEMO VALUES (v_resultado);
+  DBMS_OUTPUT.PUT_LINE(v_resultado);
+END;
+/
+
+SELECT RESULTADO FROM RESULTADO_DEMO;
+```
+
+For multiple lines, use `RESULTADO_DEMO (ORDEM NUMBER, RESULTADO VARCHAR2(4000))` and end with `SELECT ORDEM, RESULTADO FROM RESULTADO_DEMO ORDER BY ORDEM;`.
+
+**Exceptions to this pattern:**
+
+- `functions/*/questao_10.sql` — result via direct `SELECT` using the function in the query
+- `stored-procedures/*/questao_09.sql` — detailed report in DBMS Output; summary in `RESULTADO_DEMO`
+- Simple view scripts — demonstration via `SELECT` on the view
+
+### DBMS Output panel
+
+Open **DBMS Output** / **Script Output** at the bottom of the Live SQL screen after running a script.
 
 ## Exercise rules
 
 - Each question lives in a single `.sql` file with no dependencies on other files
 - Auxiliary objects (log tables, sequences, types) are created within the same script
-- Scripts include demonstration blocks when applicable (`DBMS_OUTPUT`, `SELECT`, etc.)
+- Scripts use idempotent `DROP` blocks so they can be re-run safely
 
 ## Exercise descriptions
 
