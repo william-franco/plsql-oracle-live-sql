@@ -45,7 +45,7 @@ Each topic folder contains two subfolders:
 ## How to use
 
 1. Open [Oracle Live SQL](https://livesql.oracle.com/)
-2. Copy the full contents of a file (e.g. `exceptions/hr/questao_01.sql`)
+2. Copy the full contents of a file (e.g. `exceptions/hr/question_01.sql`)
 3. Run the script with **Run Script** (executes the entire file)
 4. Check the result grid (`RESULTADO` column) or the **DBMS Output** panel
 
@@ -102,8 +102,8 @@ For multiple lines, use `RESULTADO_DEMO (ORDEM NUMBER, RESULTADO VARCHAR2(4000))
 
 **Exceptions to this pattern:**
 
-- `functions/*/questao_10.sql` — result via direct `SELECT` using the function in the query
-- `stored-procedures/*/questao_09.sql` — detailed report in DBMS Output; summary in `RESULTADO_DEMO`
+- `functions/*/question_10.sql` — result via direct `SELECT` using the function in the query
+- `stored-procedures/*/question_09.sql` — detailed report in DBMS Output; summary in `RESULTADO_DEMO`
 - Simple view scripts — demonstration via `SELECT` on the view
 
 ### DBMS Output panel
